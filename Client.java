@@ -1,86 +1,80 @@
+package pixel_art;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
-import java.util.Vector;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class Client {
 
 	Socket socket = null;
+	PrintWriter output;
+	Scanner input;
+	String carteServer = null;
+	String ip;
+	int port;
 	
-	Scanner inputStream = null;
+	public Client() {
+		
+	}
 	
-	PrintWriter outputStream = null;
-
+	public Client(String ip, String port) {
+		
+		this.ip = ip;			
+		this.port = Integer.parseInt(port);		
+	}
 	
-	public void connect(String ip, int port)
+	public void Connect()
 	{
 		try {
 			socket = new Socket(ip, port);
-			inputStream = new Scanner(socket.getInputStream());
-			outputStream = new PrintWriter(socket.getOutputStream());			
+			input = new Scanner(socket.getInputStream());
+			output = new PrintWriter(socket.getOutputStream());
+			
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}	
+		}		
 	}
 	
-	public void disonnect()
+	public void Disconnect()
 	{
-		outputStream.print("disconnect");		
+		output.println("DISCONNECT");
+		output.flush();
 		try {
 			socket.close();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 	}
 	
-	public Vector<String[]> start()
-	{
-		System.out.println("estoy en client start");
 
-		outputStream.println("start");
-		outputStream.flush();
+	public String Get(int numeroGet)
+	{		
+		
+		output.println("GET:" + numeroGet);
+		output.flush();
 		
 		
-		Vector<String[]> inputVector = new Vector<String[]>();
-		while(inputStream.hasNext() == true) {			
-						
-			String temporal = inputStream.nextLine();
-			System.out.println(temporal);
-			if (temporal.equals("END"))
-			{
-				break;
-			}
-			else if(temporal.equals("INTERRUPTED"))
-			{
-				inputVector = null;
-				return inputVector;
-			}
-			else {
-				inputVector.add(temporal.split(":") );
-			}
-						
+		carteServer = input.nextLine();
+	
+		if( !input.nextLine().equals("END") )
+		{
+			System.out.println("Error END not received");
 		}
-				
-		System.out.println(inputVector);		
-		return inputVector;
+	
+		return carteServer;
 		
 	}
 	
-	public void stop()
-	{
-		outputStream.println("stop");
-		outputStream.flush();
-		
-		
-	}
 	
 	
 }
